@@ -14,6 +14,10 @@ class Settings(BaseSettings):
 
     SQLALCHEMY_DATABASE_URI: str
 
+    MIN_STOCK_ALERT_THRESHOLD: int = 10
+    MAX_UPLOAD_SIZE: int = 5_000_000
+    PAGINATION_DEFAULT_LIMIT: int = 50
+
     @field_validator("SQLALCHEMY_DATABASE_URI")
     def validate_sqlalchemy_database_uri(cls, v):
         if not v.startswith("sqlite://") and not v.startswith("postgresql://"):
