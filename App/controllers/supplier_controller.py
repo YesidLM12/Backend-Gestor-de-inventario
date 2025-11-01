@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 from app.controllers.base_controller import BaseController
+from app.db.session import Base
 
 
 class SupplierController(BaseController):

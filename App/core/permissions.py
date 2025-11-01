@@ -1,3 +1,4 @@
+from functools import wraps
 from fastapi import HTTPException, status
 from app.utils.enums import UserRole
 from jose import jwt, JWTError
@@ -32,7 +33,7 @@ def require_role(require_role: UserRole):
     @require_role(UserRole.ADMIN)
     """
     
-    def decorator(func: Callable):
+    def decorator(func: callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request: Request = kwargs.get('request')
@@ -51,7 +52,7 @@ def require_permission(action: str):
     @require_permission('write:inventory')
     """
 
-    def decorator(func: Callable):
+    def decorator(func:  callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request: Request = kwargs.get('request')

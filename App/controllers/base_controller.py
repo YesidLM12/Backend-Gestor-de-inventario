@@ -1,4 +1,8 @@
 from abc import ABC
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+
+from app.db.session import Base
 
 class BaseController(ABC):
     def get_all(self, db: Session):

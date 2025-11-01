@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.controllers.base_controller import BaseController
 from app.models.user import User
 from app.utils.enums import UserRole
-from app.utils.security import verify_password
+# from app.utils.security import verify_password
 from fastapi import HTTPException, status
 
 
