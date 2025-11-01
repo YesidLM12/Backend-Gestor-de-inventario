@@ -18,7 +18,7 @@ class MovementType(Enum):
 class UnitOfMeasure(Enum):
     KG = 'kg'
     L = 'l'
-    UNIDAD = 'unidad'
+    UNIDAD = 'und'
     M = 'm'
     M2 = 'm2'
     M3 = 'm3'
