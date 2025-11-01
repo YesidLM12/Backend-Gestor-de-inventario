@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from datetime import datetime
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from app.db.session import Base
 
 class Supplier(Base):
@@ -12,5 +13,5 @@ class Supplier(Base):
     tax_id = Column(String, unique=True, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
 

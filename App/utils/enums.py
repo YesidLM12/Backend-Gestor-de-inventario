@@ -1,7 +1,7 @@
 from enum import Enum
 
 # Roles del sistema
-class UserRole(Enum):
+class UserRole(str, Enum):
     ADMIN = "admin"
     MANAGER = "manager"
     OPERATOR = "operator"

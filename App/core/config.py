@@ -5,20 +5,20 @@ from typing import List, Union
 
 class Settings(BaseSettings):
     PROJECT_NAME: str
-    API_V1_STR: str = "/api/v1"
+    VERSION: str
     DEBUG: bool = False
 
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    SQLALCHEMY_DATABASE_URI: str
+    DATABASE_URL: str
 
     MIN_STOCK_ALERT_THRESHOLD: int = 10
     MAX_UPLOAD_SIZE: int = 5_000_000
     PAGINATION_DEFAULT_LIMIT: int = 50
 
-    @field_validator("SQLALCHEMY_DATABASE_URI")
+    @field_validator("DATABASE_URL")
     def validate_sqlalchemy_database_uri(cls, v):
         if not v.startswith("sqlite://") and not v.startswith("postgresql://"):
             raise ValueError("Invalid SQLALCHEMY_DATABASE_URI")
@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     BACKEND_CORS_ORIGINS: List[Union[str,AnyHttpUrl]] = []
+
+    SMTP_TLS: bool = True
+    SMTP_PORT: int = 587
+    SMTP_HOST: str
+    SMTP_USER: str
+    SMTP_PASSWORD: str
+    EMAILS_FROM_EMAIL: str
+    EMAILS_FROM_NAME: str
+    FIRST_SUPERUSER_EMAIL: str
+    FIRST_SUPERUSER_PASSWORD: str
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:

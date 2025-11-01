@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 import uvicorn
+from app.db.init_db import init_db
 
 app = FastAPI()
+
+@app.on_event("startup")
+def startup():
+    init_db()
 
 @app.get("/")
 def read_root():
