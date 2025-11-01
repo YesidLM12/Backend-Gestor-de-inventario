@@ -36,21 +36,21 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
     
-    settings = Settings()
+settings = Settings()
 
-    def print_settings():
-        print("\n" + "="*50)
-        print("⚙️  CONFIGURACIÓN DE LA APLICACIÓN")
-        print("="*50)
-        print(f"📦 Proyecto: {settings.PROJECT_NAME} v{settings.VERSION}")
-        print(f"🐛 Debug: {settings.DEBUG}")
-        print(f"🌐 API Base: {settings.API_V1_STR}")
-        print(f"🗄️  Database: {settings.DATABASE_URL[:30]}...")
-        print(f"🔐 Secret Key: {'✓ Configurada' if settings.SECRET_KEY else '✗ Falta'}")
-        print(f"⏰ Token expira en: {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min")
-        print(f"🔗 CORS Origins: {len(settings.BACKEND_CORS_ORIGINS)} configurados")
-        print("="*50 + "\n")
+def print_settings():
+    print("\n" + "="*50)
+    print("⚙️  CONFIGURACIÓN DE LA APLICACIÓN")
+    print("="*50)
+    print(f"📦 Proyecto: {settings.PROJECT_NAME} v{settings.VERSION}")
+    print(f"🐛 Debug: {settings.DEBUG}")
+    print(f"🌐 API Base: {settings.API_V1_STR}")
+    print(f"🗄️  Database: {settings.DATABASE_URL[:30]}...")
+    print(f"🔐 Secret Key: {'✓ Configurada' if settings.SECRET_KEY else '✗ Falta'}")
+    print(f"⏰ Token expira en: {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min")
+    print(f"🔗 CORS Origins: {len(settings.BACKEND_CORS_ORIGINS)} configurados")
+    print("="*50 + "\n")
 
 
-        if __name__ == "__main__":
-                print_settings()
+    if __name__ == "__main__":
+            print_settings()
