@@ -2,7 +2,7 @@
 from fastapi import HTTPException, Request
 from app.db.session import SessionLocal
 from app.core.config import settings
-import pyjwt as jwt
+import jwt
 
 def get_db():
     db = SessionLocal()

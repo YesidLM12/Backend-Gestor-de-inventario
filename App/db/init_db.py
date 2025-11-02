@@ -11,8 +11,10 @@ def init_db():
     admin = db.query(User).filter(User.email == "admin@admin.com").first()
     if not admin:
         admin = User(
+            username="admin",
             email="admin@admin.com",
             password="admin",
+            role=UserRole.ADMIN,
             is_active=True,
             is_admin=True,
         )

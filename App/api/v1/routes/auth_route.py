@@ -1,20 +1,19 @@
 
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.api.v1.routes.users_route import create_user
 from app.schemas.token_schema import Token
 from app.core.security import create_access_token, login_for_access_token
 from app.controllers.user_controller import UserController
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.dependencies import get_db
 from fastapi import Depends
-from app.schemas.user_schema import UserCreate, UserResponse
+from app.schemas.user_schema import RegisterResponse, UserCreate
 from fastapi import HTTPException, status
 from datetime import timedelta
 
 router = APIRouter()
 
-@router.post('/register', response_model=UserResponse)
+@router.post('/register', response_model=RegisterResponse)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     try:
         existing_user = UserController.get_by_email(db, user.email)

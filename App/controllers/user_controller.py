@@ -5,7 +5,7 @@ from app.schemas.user_schema import UserCreate
 from app.utils.enums import UserRole
 from app.core.security import verify_password, ger_password_hash
 from fastapi import HTTPException, status
-import Pyjwt
+import jwt
 
 class UserController(BaseController):
 

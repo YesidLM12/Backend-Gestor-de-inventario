@@ -3,12 +3,11 @@ from datetime import timedelta
 from datetime import datetime
 import bcrypt
 from fastapi import HTTPException, status
-import pyjwt as jwt
+import jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.core.dependencies import settings
-from app.controllers.user_controller import UserController
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

@@ -24,3 +24,8 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class RegisterResponse(BaseModel):
+    User: UserResponse
+    access_token: str
+    token_type: str
