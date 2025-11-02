@@ -1,7 +1,8 @@
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request
 from app.db.session import SessionLocal
-
+from app.core.config import settings
+import pyjwt as jwt
 
 def get_db():
     db = SessionLocal()
@@ -31,5 +32,5 @@ def get_current_user_from_request(request: Request):
 
         return {"username": username, "role": role}
 
-    except JWTError:
+    except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
