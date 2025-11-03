@@ -1,38 +1,87 @@
 
 from sqlalchemy.orm import Session
-from app.controllers.base_controller import BaseController
+from sqlalchemy.orm import joinedload
 from app.db.session import Base
+from app.models.supplier_model import Supplier
+# from app.models.material_model import Material
+from app.schemas.supplier_schema import SupplierCreate
+
+class SupplierController:
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_active(self):
+        return self.db.query(Supplier).filter(Supplier.is_active == True).all()
+
+    
+    def get_with_materials(self, supplier_id: int):
+        return (
+            self.db.query(Supplier)
+            .options(joinedload(Supplier.materials))
+            .filter(Supplier.id == supplier_id)
+            .first()
+        )
+
+    
+    def search_by_name(self, name: str):
+        return self.db.query(Supplier).filter(Supplier.name.contains(name)).all()
 
 
-class SupplierController(BaseController):
+    def create_supplier(self, supplier_data: SupplierCreate):
 
-    def create(self, db: Session, obj_in: Base):
-        return super().create(db, obj_in)
+        supplier = Supplier(
+            name=supplier_data.name,
+            contact_name=supplier_data.contact_name,
+            phone=supplier_data.phone,
+            email=supplier_data.email,
+            tax_id=supplier_data.tax_id,
+            is_active=supplier_data.is_active
+        )
+
+        if supplier_data.materials:
+            materials = [Material(**material.dict()) for material in supplier_data.materials]
+
+            supplier.materials = materials
+        
+        self.db.add(supplier)
+        self.db.commit()
+        self.db.refresh(supplier)
+
+        return supplier
+
+
+    def update_supplier(self, supplier_id: int, supplier_data: SupplierCreate):
+        supplier = self.db.query(Supplier).filter(Supplier.id == supplier_id).first()
+
+        if not supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+
+        supplier.name = supplier_data.name
+        supplier.contact_name = supplier_data.contact_name
+        supplier.phone = supplier_data.phone
+        supplier.email = supplier_data.email
+        supplier.tax_id = supplier_data.tax_id
+        supplier.is_active = supplier_data.is_active
+
+        self.db.add(supplier)
+        self.db.commit()
+        self.db.refresh(supplier)
+
+        return supplier
     
-    def update(self, db: Session, id: int, obj_in: Base):
-        return super().update(db, id, obj_in)
-    
-    def delete(self, db: Session, id: int):
-        return super().delete(db, id)
-    
-    def get_all(self, db: Session):
-        return super().get_all(db)
-    
-    def get_by_id(self, db: Session, id: int):
-        return super().get_by_id(db, id)
-    
-    def get_multi(self, db: Session, skip: int = 0, limit: int = 100):
-        return super().get_multi(db, skip, limit)
-    
-    def get_active(self, db: Session):
-        return db.query(self.model).filter(self.model.is_active == True).all()
-    
-    
-    def get_with_materials(self, db: Session, id: int):
-        return db.query(self.model).filter(self.model.id == id).first()
-    
-    def search_by_name(self, db: Session, name: str):
-        return db.query(self.model).filter(self.model.name.contains(name)).all()
+    def delete_supplier(self, supplier_id: int):
+        supplier = self.db.query(Supplier).filter(Supplier.id == supplier_id).first()
+
+        if not supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+
+        self.db.delete(supplier)
+        self.db.commit()
+
+        return supplier
     
 
+    def get_all_suppliers(self):
+        return self.db.query(Supplier).all()
     

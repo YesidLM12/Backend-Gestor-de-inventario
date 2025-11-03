@@ -1,31 +1,33 @@
 
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, constr
 from app.utils.enums import UserRole
 from datetime import datetime
 
-class UserBase(BaseModel):
+# Schema para crear un usuario
+class UserCreate(BaseModel):
     email: EmailStr
-    username: str
-    role: Optional[UserRole] = None
+    password: str
+    full_name: str
+    role: Optional[UserRole] = None 
 
-class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=72)
 
-class UserUpdate(UserBase):
-    password: str = Field(min_length=8, max_length=72)
-
+# Schema para mostrar un usuario
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
-    username: str
-    role: str
-    created_at: Optional[datetime] = None
+    full_name: str
+    role: Optional[UserRole] = None
+    is_active: bool
 
-    class Config:
-        orm_mode = True
 
-class RegisterResponse(BaseModel):
-    User: UserResponse
-    access_token: str
-    token_type: str
+class UserInBD(UserResponse):
+    hashed_password: str
+
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+

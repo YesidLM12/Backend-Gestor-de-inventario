@@ -1,46 +1,45 @@
 
-from app.core.dependencies import get_current_user_from_request
-from app.core.security import oauth2_scheme, jwt, settings
-from app.db.session import SessionLocal
-from app.schemas.user_schema import UserResponse
-from app.utils.enums import UserRole
-from fastapi import Depends, HTTPException
-from app.utils.exceptions import PermissionDeniedException
+from fastapi import Depends
+import jwt
+from sqlalchemy.orm import Session
 
-def get_current_user(current_user: UserResponse = Depends(oauth2_scheme)) -> UserResponse:
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith('Bearer '):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
-    
-    token = auth_header.split(' ')[1]
-    
+from app.core.config import settings
+from app.core.dependencies import get_db
+from app.core.security import oauth2_scheme
+from app.utils.enums import UserRole
+from app.utils.exceptions import PermissionDeniedException
+from app.models.user_model import User
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        username: str = payload.get('sub')
-        user_id = payload.get('id')
-        role = payload.get('role')
+        user_id = payload.get('user_id')
 
-        if not username or not user_id:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
+        if user_id is None:
+            raise PermissionDeniedException(status_code=401, detail="Invalid authentication credentials")
 
-        return {"username": username, "user_id": user_id, "role": role}
+    except Exception:
+        raise PermissionDeniedException(status_code=401, detail="Invalid authentication credentials")
 
-    except jwt.JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
+    user = db.query(User).filter(User.id == user_id).first()
 
-def get_current_active_user(current_user: UserResponse = Depends(get_current_user_from_request)) -> UserResponse:
-    if not current_user.is_active:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not active")
+    if user is None:
+        raise PermissionDeniedException(status_code=401, detail="Invalid authentication credentials")
+
+    return user
+
+
+async def get_current_admin(current_user: User = Depends(get_current_user)):
+
+    if current_user.role != UserRole.ADMIN:
+        raise PermissionDeniedException(status_code=403, detail="Not enough permissions")
+
     return current_user
 
+async def get_current_manager(current_user: User = Depends(get_current_user)):
 
-async def get_current_admin(current_user: UserResponse = Depends(get_current_user_from_request)):
-    if current_user.role != UserRole.ADMIN.value.upper():
-        raise PermissionDeniedException("Not enough permissions")
-    return current_user
+    if current_user.role != UserRole.MANAGER:
+        raise PermissionDeniedException(status_code=403, detail="Not enough permissions")
 
-
-async def get_current_manager_or_admin(current_user: UserResponse = Depends(get_current_user_from_request)):
-    if current_user.role != UserRole.ADMIN.value.upper() and current_user.role != UserRole.MANAGER.value.upper():
-        raise PermissionDeniedException("Not enough permissions")
     return current_user

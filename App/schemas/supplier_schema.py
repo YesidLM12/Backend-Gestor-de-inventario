@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
@@ -10,6 +10,7 @@ class SupplierBase(BaseModel):
     phone: str
     email: EmailStr
     tax_id: str
+    # materials = List[materials]
 
     @validator('phone')
     def phone_validator(cls, v):
@@ -19,8 +20,12 @@ class SupplierBase(BaseModel):
         if not re.match(patron, v):
             raise ValueError('El número de teléfono no es válido')
         return v
+    
+    class Config:
+        orm_mode = True
 
 class SupplierCreate(SupplierBase):
+    # materials: Optional[List[MaterialCreate]] = None
     pass
 
 class SupplierUpdate(SupplierBase):

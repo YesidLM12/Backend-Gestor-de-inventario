@@ -1,61 +1,67 @@
 from fastapi import APIRouter, Depends
 
-from app.core.permissions import require_role
-from app.models.user import User
-from app.schemas.user_schema import UserCreate, UserResponse, UserUpdate
 from app.controllers.user_controller import UserController
-from app.core.dependencies import get_current_user_from_request
+from app.core.permissions import require_role
+from app.models.user_model import User
+from app.schemas.user_schema import UserResponse, UserUpdate
+from app.api.deps import get_db, get_current_user
 from app.utils.enums import UserRole
+from sqlalchemy.orm import Session
 
-router = APIRouter()
-
-@require_role(UserRole.ADMIN)
-@router.put("/{user_id}/role", response_model=UserResponse)
-async def update_user_role(user_id: int, new_role: UserRole, current_user: User = Depends(get_current_user_from_request)):
-    return update_role(current_user.db, user_id, new_role)
+router = APIRouter(prefix="/users", tags=["users"])
 
 @require_role(UserRole.ADMIN)
-@router.get("/active", response_model=list[UserResponse])
-async def get_active_users(current_user: User = Depends(get_current_user_from_request)):
-    return UserController.get_active(current_user.db)
+@router.put('/{user_id}/role', response_model=UserResponse)
+async def update_user_role(
+    user_id: int,
+    role: UserRole,
+    db: Session = Depends(get_db)
+):
+    return UserController.update_role(db, user_id, role)
 
 @require_role(UserRole.ADMIN)
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user_by_id(user_id: int, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.get_by_id(current_user.db, user_id)
+@router.delete('/{user_id}', response_model=UserResponse)
+async def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    return UserController.delete(db, user_id)
+
 
 @require_role(UserRole.ADMIN)
-@router.get("/email/{email}", response_model=UserResponse)
-async def get_user_by_email(email: str, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.get_by_email(current_user.db, email)
+@router.put('/{user_id}', response_model=UserResponse)
+async def update_user(
+    user_id: int,
+    user: UserUpdate,
+    db: Session = Depends(get_db)
+):
+    return UserController.update(db, user_id, user)
 
-@require_role(UserRole.ADMIN)
-@router.get("/search/{name}", response_model=list[UserResponse])
-async def search_user_by_name(name: str, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.search_by_name(current_user.db, name)
 
-@require_role(UserRole.ADMIN)
-@router.get("/multi", response_model=list[UserResponse])
-async def get_multi_users(skip: int = 0, limit: int = 100, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.get_multi(current_user.db, skip, limit)
+@router.get('/me', response_model=list[UserResponse])
+async def get_current_user(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return UserController.get_user_me(db, current_user)
 
-@require_role(UserRole.ADMIN)
-@router.get("/role/{role}", response_model=list[UserResponse])
-async def get_users_by_role(role: UserRole, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.get_by_role(current_user.db, role)
 
-@require_role(UserRole.ADMIN)
-@router.delete("/{user_id}")
-async def delete_user(user_id: int, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.delete(current_user.db, user_id)
+@router.get('/{user_id}', response_model=UserResponse)
+async def get_user_by_id(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    return UserController.get_user_by_id(db, user_id)
 
-@require_role(UserRole.ADMIN)
-@router.put("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: UserUpdate, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.update(current_user.db, user_id, user)
 
-@require_role(UserRole.ADMIN)
-@router.post("/", response_model=UserResponse)
-async def create_user(user: UserCreate, current_user: User = Depends(get_current_user_from_request)):
-    return UserController.create(current_user.db, user)
+@router.get('/{email}', response_model=UserResponse)
+async def get_user_by_email(
+    email: str,
+    db: Session = Depends(get_db)
+):
+    return UserController.get_user_by_email(db, email)
 
+
+@router.get('/role/{role}', response_model=list[UserResponse])
+async def get_user_by_role(
+    role: UserRole,
+    db: Session = Depends(get_db)
+):
+    return UserController.get_user_by_role(db, role)
