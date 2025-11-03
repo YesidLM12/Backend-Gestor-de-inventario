@@ -1,14 +1,14 @@
 
 from datetime import timedelta
 from datetime import datetime
-from time import timezone
+from datetime import timezone
 from typing import Optional
 from fastapi import HTTPException, status
 import jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from app.core.dependencies import settings
-
+import bcrypt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -17,12 +17,18 @@ pwd_context = CryptContext(schemes=[
 
 
 def hash_password(password: str) -> str:
-    contraseña_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    contraseña_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     return contraseña_hash
 
     
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode('utf-8')
+
+    return bcrypt.checkpw(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

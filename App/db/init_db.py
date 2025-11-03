@@ -13,6 +13,7 @@ def init_db():
     if not existing_admin:
         admin = User(
             username="admin",
+            full_name="admin",
             email="admin@admin.com",
             role=UserRole.ADMIN,
             is_active=True,

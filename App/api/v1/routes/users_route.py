@@ -38,11 +38,11 @@ async def update_user(
     return UserController.update(db, user_id, user)
 
 
-@router.get('/me', response_model=list[UserResponse])
+@router.get('/me', response_model=UserResponse)
 async def get_current_user(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return UserController.get_user_me(db, current_user)
 
-
+@require_role(UserRole.MANAGER)
 @router.get('/{user_id}', response_model=UserResponse)
 async def get_user_by_id(
     user_id: int,
@@ -50,7 +50,7 @@ async def get_user_by_id(
 ):
     return UserController.get_user_by_id(db, user_id)
 
-
+@require_role(UserRole.MANAGER)
 @router.get('/{email}', response_model=UserResponse)
 async def get_user_by_email(
     email: str,
@@ -58,7 +58,7 @@ async def get_user_by_email(
 ):
     return UserController.get_user_by_email(db, email)
 
-
+@require_role(UserRole.ADMIN)
 @router.get('/role/{role}', response_model=list[UserResponse])
 async def get_user_by_role(
     role: UserRole,

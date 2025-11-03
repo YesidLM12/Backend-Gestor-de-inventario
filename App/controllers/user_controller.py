@@ -38,7 +38,8 @@ class UserController(BaseController):
         db.commit()
         return user
     
-    def get_user_me(self, db: Session, current_user: User):
+    @staticmethod
+    def get_user_me(db: Session, current_user: User):
         user = db.query(User).filter(User.email == current_user.email).first()
 
         if not user:

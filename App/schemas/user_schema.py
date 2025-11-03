@@ -6,9 +6,10 @@ from datetime import datetime
 
 # Schema para crear un usuario
 class UserCreate(BaseModel):
+    full_name: str
+    username: str
     email: EmailStr
     password: str
-    full_name: str
     role: Optional[UserRole] = None 
 
 
@@ -30,4 +31,8 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
 
