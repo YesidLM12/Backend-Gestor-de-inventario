@@ -24,7 +24,7 @@ class Supplier(Base):
     # materials = relationship("Material", back_populates="supplier")
 
     #======================================
-    # Columnas
+    # Control
     #======================================
     
     tax_id = Column(String, unique=True, index=True)
