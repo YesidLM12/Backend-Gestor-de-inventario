@@ -22,6 +22,8 @@ class UnitOfMeasure(Enum):
     M = 'm'
     M2 = 'm2'
     M3 = 'm3'
+    CAJA = 'caja'
+    PAQUETE = 'paquete'
     
 # Tipos de estado
 class OrderStatus(Enum):
