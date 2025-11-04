@@ -1,9 +1,10 @@
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import joinedload
 from app.db.session import Base
 from app.models.supplier_model import Supplier
-# from app.models.material_model import Material
+from app.models.raw_material_model import RawMaterial
 from app.schemas.supplier_schema import SupplierCreate
 
 class SupplierController:
@@ -40,7 +41,7 @@ class SupplierController:
         )
 
         if supplier_data.materials:
-            materials = [Material(**material.dict()) for material in supplier_data.materials]
+            materials = [RawMaterial(**material.dict()) for material in supplier_data.materials]
 
             supplier.materials = materials
         

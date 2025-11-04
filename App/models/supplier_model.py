@@ -15,13 +15,6 @@ class Supplier(Base):
     phone = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
-    # supplier = relationship("Supplier", back_populates="materials")
-
-    #======================================
-    # Relaciones
-    #======================================
-
-    # materials = relationship("Material", back_populates="supplier")
 
     #======================================
     # Control
@@ -30,5 +23,11 @@ class Supplier(Base):
     tax_id = Column(String, unique=True, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    materials_associations = relationship("SupplierMaterial", back_populates="supplier", cascade="all, delete-orphan")
+
+    @property
+    def raw_materials(self):
+        return [material.material for material in self.materials_associations]
 
     
