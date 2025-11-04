@@ -1,7 +1,8 @@
 
+from datetime import datetime
 from decimal import Decimal
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, validator
 
 from app.utils.enums import UnitOfMeasure
 
