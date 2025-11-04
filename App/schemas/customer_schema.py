@@ -1,7 +1,8 @@
 
+from decimal import Decimal
 from typing import Optional
 
-from pydantic import EmailStr, Decimal
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 class CustomerBase(BaseModel):
