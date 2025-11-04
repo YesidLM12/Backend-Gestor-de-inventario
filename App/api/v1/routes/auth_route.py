@@ -5,6 +5,8 @@ from app.schemas.user_schema import UserCreate, UserLogin
 from app.core.dependencies import get_db
 from app.core.security import verify_password, create_access_token, hash_password
 from fastapi import HTTPException
+from app.core.permissions import require_role
+from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -20,6 +22,7 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
     
 
 @router.post("/register")
+@require_role(UserRole.ADMIN)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
@@ -27,7 +30,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             status_code=400,
             detail="User already exists"
         )
-    hashed_password = hash_password(user.hashed_password)
+    hashed_password = hash_password(user.password)
     db_user = User(
         full_name=user.full_name,
         username=user.username,

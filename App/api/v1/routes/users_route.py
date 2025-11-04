@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.controllers.user_controller import UserController
 from app.core.permissions import require_role
 from app.models.user_model import User
-from app.schemas.user_schema import UserResponse, UserUpdate
+from app.schemas.user_schema import RoleUpdate, UserResponse, UserUpdate
 from app.api.deps import get_db, get_current_user
 from app.utils.enums import UserRole
 from sqlalchemy.orm import Session
@@ -14,13 +14,19 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.put('/{user_id}/role', response_model=UserResponse)
 async def update_user_role(
     user_id: int,
-    role: UserRole,
-    db: Session = Depends(get_db)
+    role_update: RoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    return UserController.update_role(db, user_id, role)
+   user = UserController.update_role(db, user_id, role_update.new_role)
+
+   if not user:
+      raise HTTPException(status_code=404, detail="User not found")
+
+   return user
 
 @require_role(UserRole.ADMIN)
-@router.delete('/{user_id}', response_model=UserResponse)
+@router.delete('/{user_id}', response_model=UserResponse)  
 async def delete_user(
     user_id: int,
     db: Session = Depends(get_db)
@@ -38,9 +44,10 @@ async def update_user(
     return UserController.update(db, user_id, user)
 
 
+@require_role(UserRole.MANAGER)
 @router.get('/me', response_model=UserResponse)
-async def get_current_user(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return UserController.get_user_me(db, current_user)
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    return UserController.get_user_me(current_user)
 
 @require_role(UserRole.MANAGER)
 @router.get('/{user_id}', response_model=UserResponse)
@@ -65,3 +72,5 @@ async def get_user_by_role(
     db: Session = Depends(get_db)
 ):
     return UserController.get_user_by_role(db, role)
+
+

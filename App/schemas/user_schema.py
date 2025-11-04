@@ -5,12 +5,14 @@ from app.utils.enums import UserRole
 from datetime import datetime
 
 # Schema para crear un usuario
+
+
 class UserCreate(BaseModel):
     full_name: str
     username: str
     email: EmailStr
     password: str
-    role: Optional[UserRole] = None 
+    role: Optional[UserRole] = None
 
 
 # Schema para mostrar un usuario
@@ -32,7 +34,11 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
 
+
+class RoleUpdate(BaseModel):
+    new_role: UserRole
