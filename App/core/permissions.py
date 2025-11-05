@@ -1,9 +1,10 @@
 from functools import wraps
+from typing import Callable
 from fastapi import HTTPException, status
 from app.api.deps import get_current_user
 from app.utils.enums import UserRole
 from jose import jwt, JWTError
-from app.core.config import settings
+from app.core.config import settings    
 
 PERMISSIONS = {
     'ADMIN': ['*'],
@@ -31,7 +32,7 @@ def has_permission(user: dict, action: str) -> bool:
 
 
 def require_role(*required_role: UserRole):
-    def decorator(func: callable):
+    def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             current_user: User = kwargs.get('current_user')
@@ -55,7 +56,7 @@ def require_permission(action: str):
     @require_permission('write:inventory')
     """
 
-    def decorator(func:  callable):
+    def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request: Request = kwargs.get('request')

@@ -5,8 +5,7 @@ from app.schemas.user_schema import UserCreate, UserLogin
 from app.core.dependencies import get_db
 from app.core.security import verify_password, create_access_token, hash_password
 from fastapi import HTTPException
-from app.core.permissions import require_role
-from app.utils.enums import UserRole
+from app.api.deps import get_current_admin_or_manager
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -21,9 +20,9 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
     
 
+
 @router.post("/register")
-@require_role(UserRole.ADMIN)
-async def register(user: UserCreate, db: Session = Depends(get_db)):
+async def register(user: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_or_manager)):
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(

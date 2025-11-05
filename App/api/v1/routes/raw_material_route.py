@@ -1,44 +1,54 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_admin, get_current_admin_or_manager, get_current_user
 from app.controllers.raw_material_controller import RawMaterialController
 from app.core.dependencies import get_db
-from app.core.permissions import require_role
 from app.schemas.raw_material_schema import AssignSupplierSchema, RawMaterialResponse, RawMaterialCreate, RawMaterialUpdate
 from app.models.user_model import User
-from app.utils.enums import UserRole
 
 router = APIRouter(prefix="/raw_materials", tags=["raw_materials"])
 
 
 @router.get('/', response_model=list[RawMaterialResponse])
-def list_raw_materials(skip: int = 0,
-                       limit: int = 100,
-                       db: Session = Depends(get_db)):
+def list_raw_materials(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     materials = RawMaterialController.list_mult(skip, limit, db)
     return materials
 
 
 @router.get('/active', response_model=list[RawMaterialResponse])
-def list_active_raw_materials(skip: int = 0,
-                              limit: int = 100,
-                              db: Session = Depends(get_db)):
+def list_active_raw_materials(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     materials = RawMaterialController.get_active(skip, limit, db)
     return materials
 
 
 @router.get('/{material_id}', response_model=RawMaterialResponse)
-def get_raw_material(material_id: int,
-                     db: Session = Depends(get_db)):
+def get_raw_material(
+    material_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     material = RawMaterialController.get_raw_material(material_id, db)
     return material
 
 
-@require_role(UserRole.ADMIN or UserRole.MANAGER)
+
 @router.post('/', response_model=RawMaterialResponse, status_code=status.HTTP_201_CREATED)
-def create_raw_material(raw_material: RawMaterialCreate,
-                        db: Session = Depends(get_db),
-                        ):
+def create_raw_material(
+    raw_material: RawMaterialCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_manager)
+):
 
     existing = RawMaterialController.get_by_code(db, code=raw_material.code)
 
@@ -50,12 +60,13 @@ def create_raw_material(raw_material: RawMaterialCreate,
     return material
 
 
-@require_role(UserRole.ADMIN or UserRole.MANAGER)
 @router.put('/{material_id}', response_model=RawMaterialResponse)
-def update_raw_material(material_id: int,
-                        raw_material: RawMaterialUpdate,
-                        db: Session = Depends(get_db),
-                        ):
+def update_raw_material(
+    material_id: int,
+    raw_material: RawMaterialUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_manager)
+):
     material = RawMaterialController.get_raw_material(material_id, db)
 
     if not material:
@@ -78,11 +89,12 @@ def update_raw_material(material_id: int,
         return material
 
 
-@require_role(UserRole.ADMIN)
 @router.delete('/{material_id}', response_model=RawMaterialResponse)
-def delete_raw_material(material_id: int,
-                        db: Session = Depends(get_db),
-                        ):
+def delete_raw_material(
+    material_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
 
     material = RawMaterialController.get_raw_material(material_id, db)
     if not material:
@@ -96,12 +108,12 @@ def delete_raw_material(material_id: int,
     return None
 
 
-@require_role(UserRole.ADMIN or UserRole.MANAGER)
 @router.post('/{material_id}/suppliers', status_code=status.HTTP_201_CREATED)
 def assign_supplier_to_material(
     material_id: int,
     supplier_data: AssignSupplierSchema,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_manager)
 ):
     material = RawMaterialController.get_raw_material(material_id, db)
 
@@ -124,12 +136,12 @@ def assign_supplier_to_material(
     return {'message': 'Supplier assigned to material successfully', 'data': supplier_material}
 
 
-@require_role(UserRole.ADMIN or UserRole.MANAGER)
 @router.delete('/{material_id}/suppliers/{supplier_id}', status_code=status.HTTP_204_NO_CONTENT)
 def remove_supplier_from_material(
     material_id: int,
     supplier_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_manager)
 ):
     success = RawMaterialController.remove_supplier_from_material(
         db,
@@ -146,11 +158,11 @@ def remove_supplier_from_material(
     return None
 
 
-@require_role(UserRole.ADMIN or UserRole.MANAGER)
 @router.get('/{material_id}/suppliers', response_model=list[RawMaterialResponse])
 def get_suppliers_by_material_id(
     material_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_manager)
 ):
     material = RawMaterialController.get_raw_material(material_id, db)
 

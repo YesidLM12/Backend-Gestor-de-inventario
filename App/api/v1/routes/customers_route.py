@@ -6,33 +6,33 @@ from app.core.dependencies import get_db
 from app.core.permissions import require_role
 from app.schemas.customer_schema import CustomerResponse, CustomerCreate, CustomerUpdate
 from app.schemas.user_schema import UserRole
-
+from app.api.deps import get_current_admin, get_current_admin_or_manager, get_current_user
+from app.models.user_model import User
 router = APIRouter(prefix="/customers", tags=["customers"])
 
 
 @router.get('/', response_model=list[CustomerResponse])
-def list_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     customers = CustomerController(db).get_multi(skip, limit)
     return customers
 
 
 @router.get('/active', response_model=list[CustomerResponse])
-def list_active_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_active_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     customers = CustomerController(
         db).get_active_customers(skip=skip, limit=limit)
     return customers
 
 
-@require_role(UserRole.MANAGER or UserRole.ADMIN)
 @router.get('with-debt', response_model=list[CustomerResponse])
-def list_customers_with_debt(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_customers_with_debt(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_or_manager)):
     customers = CustomerController(
         db).get_customers_with_debt(skip=skip, limit=limit)
     return customers
 
 
 @router.get('/{customer_id}', response_model=CustomerResponse)
-def get_customer(customer_id: int, db: Session = Depends(get_db)):
+def get_customer(customer_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     customer = CustomerController(db).get_customer_by_id(customer_id)
 
     if not customer:
@@ -43,16 +43,14 @@ def get_customer(customer_id: int, db: Session = Depends(get_db)):
     return customer
 
 
-@require_role(UserRole.MANAGER or UserRole.ADMIN)
 @router.post('/', response_model=CustomerResponse)
-def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
+def create_customer(customer: CustomerCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_or_manager)):
     constumer = CustomerController(db).create_customer(customer)
     return constumer
 
 
-@require_role(UserRole.MANAGER or UserRole.ADMIN)
 @router.put('/{customer_id}', response_model=CustomerResponse)
-def update_customer(customer_id: int, customer: CustomerUpdate, db: Session = Depends(get_db)):
+def update_customer(customer_id: int, customer: CustomerUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_or_manager)):
     constumer = CustomerController(db).update_customer(customer_id, customer)
 
     if not constumer:
@@ -63,9 +61,8 @@ def update_customer(customer_id: int, customer: CustomerUpdate, db: Session = De
     return constumer
 
 
-@require_role(UserRole.ADMIN)
 @router.delete('/{customer_id}', response_model=CustomerResponse)
-def delete_customer(customer_id: int, db: Session = Depends(get_db)):
+def delete_customer(customer_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_or_manager)):
     customer = CustomerController(db).get_customer_by_id(customer_id)
 
     if not customer:
