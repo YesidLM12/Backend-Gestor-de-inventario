@@ -1,10 +1,10 @@
 # Visión General del Proyecto
-Este es un sistema backend robusto de gestión de inventario diseñado con arquitectura profesional en capas, implemetnado control de acceso y gestion complñeta de la cadena de suministro.
+Este es un sistema backend robusto de gestión de inventario diseñado con arquitectura profesional en capas, implementando control de acceso y gestion completa de la cadena de suministro.
 
 ## Proposito del Sistema
 El proyecto resuelve las necesidades  operativas de un negocio que maneja: 
 
-- Materia prima con constrol de stock y trazabilidad
+- Materia prima con control de stock y trazabilidad
 - Proveedores con historial de transacciones
 - Clientes Frecuentes con seguimiento de compras
 - Usuarios con diferentes permisos (Admin, Manager y Employee)
