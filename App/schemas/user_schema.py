@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
-    role: Optional[UserRole] = None
+    role: Optional[UserRole] = "viewer"
 
 
 # Schema para mostrar un usuario

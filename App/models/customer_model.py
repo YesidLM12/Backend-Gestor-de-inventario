@@ -33,6 +33,7 @@ class Customer(Base):
     # ======================================
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # ======================================
     # Relaciones

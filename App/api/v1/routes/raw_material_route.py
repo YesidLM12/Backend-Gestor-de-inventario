@@ -4,8 +4,11 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_current_admin_or_manager, get_current_user
 from app.controllers.raw_material_controller import RawMaterialController
 from app.core.dependencies import get_db
+from app.models.supplier_material_model import SupplierMaterial
 from app.schemas.raw_material_schema import AssignSupplierSchema, RawMaterialResponse, RawMaterialCreate, RawMaterialUpdate
 from app.models.user_model import User
+from app.models.raw_material_model import RawMaterial
+from sqlalchemy.orm import joinedload
 
 router = APIRouter(prefix="/raw_materials", tags=["raw_materials"])
 
@@ -17,7 +20,7 @@ def list_raw_materials(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    materials = RawMaterialController.list_mult(skip, limit, db)
+    materials = RawMaterialController.list_multi(db, skip, limit)
     return materials
 
 
@@ -28,19 +31,35 @@ def list_active_raw_materials(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    materials = RawMaterialController.get_active(skip, limit, db)
+    materials = RawMaterialController.get_active(db, skip, limit)
     return materials
 
 
 @router.get('/{material_id}', response_model=RawMaterialResponse)
-def get_raw_material(
+def get_raw_materia_by_id(
     material_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    material = RawMaterialController.get_raw_material(material_id, db)
-    return material
+    material = db.query(RawMaterial).options(
+        joinedload(RawMaterial.suppliers_associations).joinedload(
+            SupplierMaterial.material)
+    ).filter(RawMaterial.id == material_id).first()
 
+    if not material:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Raw material not found"
+        )
+
+    if material.suppliers_associations:
+        first_assoc = material.suppliers_associations[0]
+        print(f"Campos disponibles: {dir(first_assoc)}")
+        print(f"¿Tiene material_id? {hasattr(first_assoc, 'material_id')}")
+        print(
+            f"Valor: {first_assoc.material_id if hasattr(first_assoc, 'material_id') else 'NO EXISTE'}")
+
+    return material
 
 
 @router.post('/', response_model=RawMaterialResponse, status_code=status.HTTP_201_CREATED)
@@ -60,14 +79,14 @@ def create_raw_material(
     return material
 
 
-@router.put('/{material_id}', response_model=RawMaterialResponse)
+@router.put('/{material_id}', response_model=RawMaterialUpdate)
 def update_raw_material(
     material_id: int,
     raw_material: RawMaterialUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_or_manager)
 ):
-    material = RawMaterialController.get_raw_material(material_id, db)
+    material = RawMaterialController.get_raw_material(db, material_id)
 
     if not material:
         raise HTTPException(
@@ -84,19 +103,25 @@ def update_raw_material(
                 detail="Raw material with this code already exists"
             )
 
-        material = RawMaterialController.update_raw_material(
-            material_id, raw_material, db)
-        return material
+    updated_material = RawMaterialController.update_material(
+        db, material_id, raw_material)
+
+    if not updated_material:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Raw material not found"
+        )
+    return updated_material
 
 
-@router.delete('/{material_id}', response_model=RawMaterialResponse)
+@router.delete('/{material_id}')
 def delete_raw_material(
     material_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin)
 ):
 
-    material = RawMaterialController.get_raw_material(material_id, db)
+    material = RawMaterialController.get_raw_material(db, material_id)
     if not material:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -105,7 +130,7 @@ def delete_raw_material(
 
     material.is_active = False
     db.commit()
-    return None
+    return {"message": "Raw material deleted successfully"}
 
 
 @router.post('/{material_id}/suppliers', status_code=status.HTTP_201_CREATED)
@@ -115,7 +140,7 @@ def assign_supplier_to_material(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_or_manager)
 ):
-    material = RawMaterialController.get_raw_material(material_id, db)
+    material = RawMaterialController.get_raw_material(db, material_id)
 
     if not material:
         raise HTTPException(
@@ -143,7 +168,7 @@ def remove_supplier_from_material(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_or_manager)
 ):
-    success = RawMaterialController.remove_supplier_from_material(
+    success = RawMaterialController.remove_supplier(
         db,
         material_id=material_id,
         supplier_id=supplier_id,
@@ -164,14 +189,14 @@ def get_suppliers_by_material_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_or_manager)
 ):
-    material = RawMaterialController.get_raw_material(material_id, db)
+    material = RawMaterialController.get_raw_material(db, material_id)
 
     if not material:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Raw material not found"
         )
-    
-    suppliers = RawMaterialController.get_with_suppliers(material_id, db)
-    
-    return suppliers
+
+    suppliers = RawMaterialController.get_with_suppliers(db, material_id)
+
+    return [suppliers]

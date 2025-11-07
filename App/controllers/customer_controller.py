@@ -26,8 +26,8 @@ class CustomerController:
         return self.db.query(Customer).offset(skip).limit(limit).all()
 
 
-    def get_active_customers(self):
-        return self.db.query(Customer).filter(Customer.is_active == True).all()
+    def get_active_customers(self, skip: int = 0, limit: int = 100):
+        return self.db.query(Customer).filter(Customer.is_active == True).offset(skip).limit(limit).all()
 
 
     def get_customer_by_id(self, customer_id: int):

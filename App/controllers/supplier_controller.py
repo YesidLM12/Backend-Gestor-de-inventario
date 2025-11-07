@@ -25,6 +25,10 @@ class SupplierController:
         )
 
     
+    def get_by_id(self, supplier_id: int):
+        return self.db.query(Supplier).filter(Supplier.id == supplier_id).first()
+
+    
     def search_by_name(self, name: str):
         return self.db.query(Supplier).filter(Supplier.name.contains(name)).all()
 

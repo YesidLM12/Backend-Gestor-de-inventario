@@ -37,8 +37,8 @@ class RawMaterial(Base):
 
     @property
     def suppliers(self):
-        return [supplier.supplier for supplier in self.suppliers_associations]
-    
+        return self.suppliers_associations
+        
     @property
     def preferred_supplier(self):
         return [supplier.supplier for supplier in self.suppliers_associations if supplier.is_preferred]

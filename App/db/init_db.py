@@ -1,6 +1,7 @@
 from app.db.session import engine,Base,SessionLocal
 from app.models.user_model import User
 from app.utils.enums import UserRole
+from app.core.security import hash_password
 
 def init_db():
     print("Creating database")
@@ -18,7 +19,7 @@ def init_db():
             role=UserRole.ADMIN,
             is_active=True,
             is_admin=True,
-            hashed_password="admin",
+            hashed_password=hash_password("admin"),
         )
         db.add(admin)
         db.commit()

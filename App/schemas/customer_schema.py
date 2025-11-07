@@ -23,7 +23,7 @@ class CustomerUpdate(CustomerBase):
 
 class CustomerResponse(CustomerBase):
     id: int
-    cuerrent_balance: Decimal
+    current_balance: Decimal
     is_active: bool
     created_at: datetime
     updated_at: datetime

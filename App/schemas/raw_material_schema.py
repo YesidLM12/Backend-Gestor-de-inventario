@@ -1,34 +1,13 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
-from pydantic import BaseModel, Field, validator
+from typing import List, Optional, TYPE_CHECKING
+from pydantic import BaseModel, ConfigDict, Field, validator
 
 from app.utils.enums import UnitOfMeasure
 
-
-class SupplierMaterialBase(BaseModel):
-    supplier_id: int
-    supplier_price: Decimal = Field(gt=0,description="Precio del proveedor")
-    is_preferred: bool = False
-    lead_time_days: int = Field(gt=0,description="Tiempo de entrega")
-    min_order_quantity: Decimal = Field(gt=0)
-
-
-class SupplierMaterialCreate(SupplierMaterialBase):
-    pass
-
-
-class SupplierMaterialResponse(SupplierMaterialBase):
-    raw_material_id: int
-    last_purchase_date: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.now)
-    
-    # Incluir datos del supplier
-    supplier_name: Optional[str] = None
-
-    class Config:
-        orm_mode = True
+if TYPE_CHECKING:
+    from app.schemas.supplier_schema import SupplierMaterialResponse
 
 
 class RawMaterialBase(BaseModel):
@@ -40,17 +19,22 @@ class RawMaterialBase(BaseModel):
     min_stock: Decimal = Field(gt=0, default=Decimal("0.00"))
     max_stock: Optional[Decimal] = Field(gt=0, default=Decimal("0.00"))
     reorder_point: Optional[Decimal] = Field(gt=0, default=None)
-    category_id: Optional[str] = Field(max_length=100, default=None)
+    category: Optional[str] = Field(max_length=100, default=None)
 
 
 class RawMaterialCreate(RawMaterialBase):
     supplier_ids: Optional[List[int]] = []
+    supplier_price: Optional[Decimal] = None
+    is_preferred: Optional[bool] = False
+    lead_time_days: Optional[int] = None
+    min_order_quantity: Optional[Decimal] = None
 
     @validator('max_stock')
     def validate_max_stock(cls, v, values):
         if v is not None and 'min_stock' in values:
             if v < values['min_stock']:
-                raise ValueError('max_stock debe ser mayor o igual a min_stock')
+                raise ValueError(
+                    'max_stock debe ser mayor o igual a min_stock')
         return v
 
 
@@ -66,21 +50,37 @@ class RawMaterialUpdate(BaseModel):
     category: Optional[str] = Field(None, max_length=100)
     is_active: Optional[bool] = None
 
+class SupplierInfoInMaterial(BaseModel):
+    supplier_id: int
+    material_id: int
+    supplier_price: Decimal
+    is_preferred: bool
+    lead_time_days: Optional[int] = 0
+    min_order_quantity: Optional[Decimal] = 0
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
 
 class RawMaterialResponse(RawMaterialBase):
     id: int
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    code: Optional[str] = Field(None, min_length=1, max_length=50)
+    unit_of_measure: UnitOfMeasure
+    unit_price: Decimal = Field(gt=0, default=Decimal("0.00"))
+    category: Optional[str] = Field(max_length=100, default=None)
     is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    
+
     # Stock actual (cuando lo tengamos implementado)
     current_stock: Optional[Decimal] = None
-    
+
     # Lista de proveedores (nested)
-    suppliers: Optional[List[dict]] = []
-    
+    suppliers_associations: List[SupplierInfoInMaterial] = []
+
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
 
 
 class AssignSupplierSchema(BaseModel):
@@ -89,3 +89,7 @@ class AssignSupplierSchema(BaseModel):
     is_preferred: bool = False
     lead_time_days: int = Field(ge=0, default=0)
     min_order_quantity: Decimal = Field(ge=0, default=Decimal("0.00"))
+
+
+from app.schemas.supplier_schema import SupplierMaterialResponse
+RawMaterialResponse.model_rebuild()
