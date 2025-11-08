@@ -35,6 +35,12 @@ class RawMaterial(Base):
     # Realciones
     suppliers_associations = relationship("SupplierMaterial", back_populates="material", cascade="all, delete-orphan")
 
+    #One-to-One
+    inventory = relationship("Inventory", back_populates="raw_material", uselist=False, cascade="all, delete-orphan")
+
+    #Many-to-One
+    movements = relationship("Movement", back_populates="raw_material", cascade="all, delete-orphan")
+
     @property
     def suppliers(self):
         return [supplier.supplier for supplier in self.suppliers_associations]
@@ -42,3 +48,17 @@ class RawMaterial(Base):
     @property
     def preferred_supplier(self):
         return [supplier.supplier for supplier in self.suppliers_associations if supplier.is_preferred]
+    
+    @property
+    def current_stock(self):
+        if self.inventory:
+            return self.inventory.quantity
+        return 0
+    
+    @property
+    def is_low_stock(self):
+        return self.current_stock <= self.min_stock
+    
+    @property
+    def is_out_of_stock(self):
+        return self.current_stock <= 0
