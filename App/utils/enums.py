@@ -11,8 +11,19 @@ class UserRole(str, Enum):
 class MovementType(Enum):
     ENTRADA = 'entrada'
     SALIDA = 'salida'
-    AJUSTE = 'ajuste'
+    AJUSTE_POSITIVO = 'ajuste_positivo'
+    AJUSTE_NEGATIVO = 'ajuste_negativo'
     MERMA = 'merma'
+    DEVOLUCION_ENTRADA = 'devolucion_entrada' # devuelve proveddor a nosostros
+    DEVOLUCION_SALIDA = 'devolucion_salida' # cliente nos devuelve
+    TRANSFERENCIA_ENTRADA = 'transferencia_entrada'
+    TRANSFERENCIA_SALIDA = 'transferencia_salida'
+
+
+class MovementStatus (str, Enum):
+    PENDIENTE = 'pendiente'
+    COMPLETADO = 'completado'
+    CANCELADO = 'cancelado'
 
 # Unidades de medida
 class UnitOfMeasure(Enum):
