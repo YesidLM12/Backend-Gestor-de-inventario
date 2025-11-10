@@ -1,6 +1,8 @@
 
-from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, DateTime, func
+from sqlalchemy import Column, ForeignKey, Index, Integer, Numeric, String, DateTime, func
 from sqlalchemy.orm import relationship
+
+from app.db.session import Base
 
 class Inventory(Base):
     __tablename__ = "inventory"
@@ -22,7 +24,7 @@ class Inventory(Base):
 
     last_movement = relationship(
         "Movement",
-        back_populates="inventory",
+        # back_populates="inventory",
         uselist=False
     )
 

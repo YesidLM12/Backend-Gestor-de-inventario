@@ -4,5 +4,7 @@ from .customer_model import Customer
 from .supplier_model import Supplier
 from .raw_material_model import RawMaterial
 from .supplier_material_model import SupplierMaterial
+from .inventory_model import Inventory
+from .movement_model import Movement
 
 

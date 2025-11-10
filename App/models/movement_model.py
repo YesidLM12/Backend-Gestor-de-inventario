@@ -1,8 +1,8 @@
 
-from typing import Text
 from sqlalchemy import Column, ForeignKey, Index, Integer, Numeric, String, DateTime, Enum, func
 from sqlalchemy.orm import relationship
 
+from app.db.session import Base
 from app.utils.enums import MovementType
 
 
@@ -21,9 +21,9 @@ class Movement(Base):
     notes = Column(String(255), nullable=True)
 
     # RElación con documentos externos
-    order_id = Column(Integer, ForeignKey('orders.id', ondelete="SET NULL"), nullable=True, nullable=True)
-    supplier_id = Column(Integer, ForeignKey('suppliers.id', ondelete="SET NULL"), nullable=True, nullable=True)
-    customer_id = Column(Integer, ForeignKey('customers.id', ondelete="SET NULL"), nullable=True, nullable=True)
+    # order_id = Column(Integer, ForeignKey('orders.id', ondelete="SET NULL"), nullable=True)
+    supplier_id = Column(Integer, ForeignKey('suppliers.id', ondelete="SET NULL"), nullable=True)
+    customer_id = Column(Integer, ForeignKey('customers.id', ondelete="SET NULL"), nullable=True)
 
     # Auditoria temporal
     created_at = Column(DateTime(timezone=True),
@@ -34,17 +34,17 @@ class Movement(Base):
     cancelled_at = Column(DateTime(timezone=True), nullable=True)
     cancelled_by_user_id = Column(Integer, ForeignKey(
         'users.id', ondelete="SET NULL"), nullable=True)
-    cancellation_reason = Column(Text(255), nullable=True)
+    cancellation_reason = Column(String(255), nullable=True)
 
     # relaciones
     raw_material = relationship("RawMaterial", back_populates="movements")
-    user = relationship("User", back_populates="movements")
+    user = relationship("User", foreign_keys=[user_id], back_populates="movements")
 
     supplier = relationship("Supplier")
     customer = relationship("Customer")
 
     cancelled_by_user = relationship(
-        "User", back_populates="cancelled_movements")
+        "User", foreign_keys=[cancelled_by_user_id], back_populates="cancelled_movements")
 
     __table_args__ = (
         Index('idx_movement_material_date', 'raw_material_id', 'created_at'),
@@ -55,3 +55,4 @@ class Movement(Base):
 
     def __repr__(self):
         return f"<Movement(id={self.id}, raw_material_id={self.raw_material_id}, user_id={self.user_id}, movement_type={self.movement_type}, quantity={self.quantity})>"
+

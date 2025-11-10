@@ -19,3 +19,7 @@ class User(Base):
 
     movements = relationship(
         'Movement', back_populates='user', foreign_keys='Movement.user_id')
+    cancelled_movements = relationship(
+        'Movement', back_populates='cancelled_by_user', foreign_keys='Movement.cancelled_by_user_id')
+
+from app.models.movement_model import Movement
