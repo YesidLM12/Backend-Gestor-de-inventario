@@ -1,12 +1,14 @@
 from decimal import Decimal
 from operator import and_
+from typing import List, Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from app.models.raw_material import RawMaterial
+from app.models.raw_material_model import RawMaterial
 from app.models.inventory_model import Inventory
 from app.models.movement_model import Movement
 from app.utils.enums import MovementType
 from fastapi import HTTPException
+
 
 
 class InventoryController:

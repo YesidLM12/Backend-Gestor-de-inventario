@@ -4,7 +4,8 @@ from typing import List, Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from datetime import date, datetime
-from app.models.movement import Movement
+from app.models.movement_model import Movement
+from app.schemas.movement_schema import MovementWithDetails
 from app.utils.enums import MovementType
 
 
@@ -216,7 +217,7 @@ class MovementController:
         material_id: int,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None
-    ) -> MovementSummary:
+    ) -> MovementWithDetails:
         query = self.db.query(Movement).filter(
             Movement.material_id == material_id,
             Movement.is_cancelled == False
