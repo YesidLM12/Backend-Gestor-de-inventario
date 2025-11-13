@@ -70,6 +70,8 @@ class InventoryController:
                 user_id=user_id,
                 type=MovementType.ENTRADA,
                 quantity=quantity,
+                quantity_before=quantity_before,
+                quantity_after=quantity_after,
                 reference=reference,
                 notes=notes,
                 supplier_id=supplier_id,
@@ -422,7 +424,7 @@ class InventoryController:
                 raise HTTPException(status_code=404, detail="Stock not found")
 
             # Crear un NUEVO movimiento de reversa
-            quantity_before = inventory.quantity
+            quantity_before = inventory.quantity 
             quantity_after = inventory.quantity - movement.quantity
 
             reverse_movement = Movement(
