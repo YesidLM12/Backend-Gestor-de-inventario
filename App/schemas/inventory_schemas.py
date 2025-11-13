@@ -53,7 +53,7 @@ class LowStockAlert(BaseModel):
     matrial_name: str
     material_code: str
     current_stock: Decimal
-    min_stock: Decima
+    min_stock: Decimal
     unit_of_measure: str
     difference: Decimal
 

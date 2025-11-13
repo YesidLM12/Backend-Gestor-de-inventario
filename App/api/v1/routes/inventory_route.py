@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -6,10 +7,11 @@ from app.api.deps import get_current_user
 from app.core.dependencies import get_db
 from app.controllers.inventory_controller import InventoryController
 from app.controllers.movement_controller import MovementController
+from app.schemas.inventory_schemas import InventoryResponse
 from app.schemas.movement_schema import CancelMovement, MovementCreate, MovementResponse, MovementWithDetails
 from app.models.user_model import User
-from app.core.dependencies import get_current_admin_or_manager
-from app.utils.enums import UserRole
+from app.api.deps import get_current_admin_or_manager
+from app.utils.enums import MovementType, UserRole
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 """

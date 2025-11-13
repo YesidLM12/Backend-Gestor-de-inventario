@@ -30,11 +30,6 @@ async def register(user: UserCreate, db: Session = Depends(get_db), current_user
             detail="User already exists"
         )
     hashed_password = hash_password(user.password)
-
-    if user.role == "admin":
-        user.is_admin = True
-    else:
-        user.is_admin = False
         
     db_user = User(
         full_name=user.full_name,
@@ -42,7 +37,6 @@ async def register(user: UserCreate, db: Session = Depends(get_db), current_user
         email=user.email,
         hashed_password=hashed_password,
         role=user.role,
-        is_admin=user.is_admin,
         is_active=True
     )
     db.add(db_user)
